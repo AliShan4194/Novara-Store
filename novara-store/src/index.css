@@ -1,0 +1,297 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =====================================================================
+   NOVARA — theme colours.  Format is "R G B" so Tailwind can add opacity.
+   The site opens in the DARK studio look by default; the sun/moon button
+   in the navbar switches to the light look.
+   Palette: matte black, charcoal, off-white, soft grey, muted champagne.
+   ===================================================================== */
+:root {
+  --bg: 244 241 236;
+  --bg-top: 252 250 246;
+  --bg-bottom: 228 223 213;
+  --surface: 255 253 250;
+  --ink: 14 14 17;
+  --muted: 84 84 92;
+  --line: 214 209 199;
+  --accent: 140 98 42; /* darker gold = readable on light backgrounds */
+  --stage: 255 255 255; /* product photo backdrop (centre) */
+  --stage-edge: 226 221 212; /* product photo backdrop (edge) */
+  --hi: 255 255 255; /* top edge highlight on cards */
+  --hi-a: 0.6;
+}
+.dark {
+  --bg: 9 9 11;
+  --bg-top: 22 22 26;
+  --bg-bottom: 4 4 5;
+  --surface: 23 23 28;
+  --ink: 244 241 235;
+  --muted: 174 174 183;
+  --line: 54 54 62;
+  --accent: 214 182 134; /* muted champagne */
+  --stage: 58 58 64;
+  --stage-edge: 20 20 24;
+  --hi: 255 255 255;
+  --hi-a: 0.08;
+}
+/* Permanently dark areas (navbar, hero, footer, banners) always use light text + champagne. */
+.on-dark {
+  --ink: 244 241 235;
+  --muted: 190 190 198;
+  --line: 62 62 70;
+  --accent: 222 190 142;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    overflow-x: clip; /* never allow sideways scrolling */
+  }
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+    overflow-x: clip;
+    transition: background-color 0.4s ease, color 0.4s ease;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: rgb(var(--accent) / 0.35);
+  }
+  h1, h2, h3 {
+    @apply font-display;
+    letter-spacing: -0.02em;
+  }
+  img {
+    @apply select-none;
+  }
+}
+
+/* =====================================================================
+   STUDIO BACKGROUND  (see src/components/StudioBackground.jsx)
+   A fixed stack of layers that never scroll, so content glides over a
+   real-feeling studio wall:  base tone → stone clouds → marble veins →
+   dark twill fabric → light cones → vignette.
+   ===================================================================== */
+.studio-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background: rgb(var(--bg));
+}
+.studio-bg > div {
+  position: absolute;
+  inset: 0;
+}
+.sb-base {
+  background: linear-gradient(180deg, rgb(var(--bg-top)) 0%, rgb(var(--bg)) 52%, rgb(var(--bg-bottom)) 100%);
+}
+/* soft cloudy mottling, like a honed stone slab */
+.sb-clouds {
+  opacity: 0.2;
+  background-size: 1100px 1100px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1100' height='1100'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0035 .0055' numOctaves='4' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.5 0 0 0 -.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
+}
+/* very thin, sparse marble veining */
+.sb-marble {
+  opacity: 0.07;
+  background-size: 1300px 1300px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1300' height='1300'%3E%3Cfilter id='v' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='turbulence' baseFrequency='.0042 .0075' numOctaves='5' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 -12 0 0 0 1.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23v)'/%3E%3C/svg%3E");
+}
+/* dark fabric twill: two crossing sets of ultra-fine lines */
+.sb-fabric {
+  opacity: 0.55;
+  background-image:
+    repeating-linear-gradient(45deg, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(-45deg, rgb(0 0 0 / 0.22) 0 1px, transparent 1px 4px);
+}
+/* light: overhead key light, warm side light, cool rim light + faint floor haze */
+.sb-light {
+  background:
+    radial-gradient(62% 46% at 50% -10%, rgb(255 240 214 / 0.15), transparent 70%),
+    radial-gradient(40% 50% at 4% 32%, rgb(214 182 134 / 0.09), transparent 70%),
+    radial-gradient(46% 55% at 100% 68%, rgb(120 138 190 / 0.1), transparent 70%),
+    linear-gradient(0deg, rgb(255 255 255 / 0.025), transparent 22%);
+}
+.sb-vignette {
+  background: radial-gradient(125% 95% at 50% 32%, transparent 48%, rgb(0 0 0 / 0.62) 100%);
+}
+/* light mode: same layers, tuned for a bright studio */
+html:not(.dark) .sb-clouds {
+  filter: invert(1);
+  opacity: 0.07;
+}
+html:not(.dark) .sb-marble {
+  filter: invert(1);
+  opacity: 0.06;
+}
+html:not(.dark) .sb-fabric {
+  opacity: 0.08;
+}
+html:not(.dark) .sb-light {
+  background:
+    radial-gradient(62% 46% at 12% -8%, rgb(255 255 255 / 0.9), transparent 70%),
+    radial-gradient(45% 55% at 105% 30%, rgb(214 178 128 / 0.18), transparent 70%),
+    radial-gradient(70% 40% at 50% 118%, rgb(40 30 20 / 0.1), transparent 70%);
+}
+html:not(.dark) .sb-vignette {
+  background: radial-gradient(125% 95% at 50% 32%, transparent 55%, rgb(60 45 30 / 0.14) 100%);
+}
+
+/* Fine film grain on top of everything (very subtle) */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.dark body::after {
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Texture for the always-dark blocks (hero, footer, banners): stone clouds + twill */
+.texture-dark {
+  background-image:
+    repeating-linear-gradient(45deg, rgb(255 255 255 / 0.014) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(-45deg, rgb(0 0 0 / 0.2) 0 1px, transparent 1px 4px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1100' height='1100'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0035 .0055' numOctaves='4' seed='23' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .5 0 0 0 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
+  background-size: auto, auto, 1100px 1100px;
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-[1320px] px-5 sm:px-8 lg:px-12;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold tracking-[0.01em]
+      transition-all duration-300 ease-out active:scale-[0.97] disabled:opacity-50 select-none;
+  }
+  /* Main button: off-white on dark (charcoal on light) — the strongest contrast on the page */
+  .btn-primary {
+    @apply btn bg-ink text-bg hover:-translate-y-0.5 hover:scale-[1.02];
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 10px 24px -12px rgb(0 0 0 / 0.7);
+  }
+  .btn-primary:hover {
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 18px 32px -14px rgb(0 0 0 / 0.75);
+  }
+  /* Champagne button: brushed-metal gradient, always dark text */
+  .btn-accent {
+    @apply btn text-night hover:-translate-y-0.5 hover:scale-[1.02];
+    background-image: linear-gradient(180deg, #ecd7ae 0%, #d6b583 50%, #bf9a64 100%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 10px 22px -12px rgb(191 154 100 / 0.7);
+  }
+  .btn-accent:hover {
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55), 0 16px 30px -12px rgb(191 154 100 / 0.8);
+  }
+  .btn-ghost {
+    @apply btn border border-ink/25 bg-surface/60 text-ink backdrop-blur hover:border-ink/55 hover:bg-surface hover:-translate-y-0.5;
+  }
+  .btn-glass {
+    @apply btn border border-white/25 bg-white/[0.07] text-white backdrop-blur-md hover:border-white/50 hover:bg-white/15 hover:-translate-y-0.5;
+  }
+  .glass {
+    @apply border border-white/15 bg-white/[0.07] backdrop-blur-xl;
+  }
+  .field {
+    @apply w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm outline-none
+      transition placeholder:text-muted/70 focus:border-accent focus:ring-4 focus:ring-accent/15;
+  }
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.24em] text-accent;
+  }
+}
+
+/* ---------- Studio lighting overlay for product photos ----------
+   Soft key light from the top-left + shaded floor + gentle edge vignette. */
+.studio-light {
+  background:
+    radial-gradient(120% 75% at 18% 0%, rgb(255 255 255 / 0.16), transparent 55%),
+    linear-gradient(to top, rgb(0 0 0 / 0.3), transparent 42%);
+  box-shadow: inset 0 0 80px rgb(0 0 0 / 0.22);
+}
+
+/* Warm stage light behind a section (add together with "relative isolate") */
+.stage-glow::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  top: -4rem;
+  height: 640px;
+  pointer-events: none;
+  background: radial-gradient(60% 60% at 50% 0%, rgb(var(--accent) / 0.14), transparent 70%);
+}
+
+/* ---------- Premium hover effect (tilt + spotlight + image follow) ----------
+   src/hooks/useHoverFx.js eases the mouse position every frame and writes:
+   --mx --my (spotlight)  --rx --ry (tilt)  --ix --iy (image follow)  --k (hover strength 0 → 1).
+   Everything is intentionally small so cards feel calm, not bouncy. */
+.fx {
+  position: relative;
+  transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
+    translateY(calc(var(--k, 0) * -5px)) scale(calc(1 + var(--k, 0) * 0.008));
+  transition: box-shadow 0.7s ease, border-color 0.7s ease;
+  will-change: transform;
+}
+.fx::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--k, 0);
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(255 236 200 / 0.14), transparent 60%);
+  z-index: 3;
+}
+.fx-img {
+  transform: translate3d(var(--ix, 0px), var(--iy, 0px), 0) scale(calc(1.001 + var(--k, 0) * 0.07));
+  filter: contrast(1.05) saturate(1.04) brightness(0.98); /* subtle cinematic grade */
+  will-change: transform;
+}
+
+/* Touch devices & reduced-motion users: switch the fancy stuff off. */
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .fx {
+    transform: none !important;
+  }
+  .fx::after {
+    display: none;
+  }
+  .fx-img {
+    transform: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Small screens: lighter background (no marble) to keep scrolling smooth */
+@media (max-width: 640px) {
+  .sb-marble {
+    display: none;
+  }
+}
+
+/* Misc */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.text-balance {
+  text-wrap: balance;
+}
